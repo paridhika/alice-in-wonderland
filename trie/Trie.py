@@ -1,5 +1,7 @@
 #!/usr/bin/python
 #Node for Trie implementation
+#value -> char at this node
+#branches -> dictionary of children char vs corresponding trieNodes
 class TrieNode:
 	#constructor
 	count = 0
@@ -22,8 +24,8 @@ class TrieNode:
 	def getChild(self,char):
 		if(char in self.branches):
 			return self.branches[char]
-
-
+	
+	#prints all words in the trie, used for debugging
 	def _str_(self,tempNode,lists):
 		if not tempNode.branches:
 			print(lists)
@@ -32,8 +34,13 @@ class TrieNode:
 				lists.append(currNode)
 				self._str_(tempNode.branches[currNode],lists)
 				lists.remove(currNode)
-		return	
+		return
+
+
+
 #Trie implementation
+#Implementatin class for Trie. 
+#wordsOfSize -> the trie will hold all the words of this size only
 class Trie:
 	def _init_(self,wordsOfSize,words):
 		self.wordsOfSize = wordsOfSize
@@ -52,6 +59,16 @@ class Trie:
 	def getRoot():
 		return self.root
 
+
+#contains dictionary of length of words vs instance of above Trie class
+#This class contains all the methods to find the words similar to a given word
+
+#Algo:
+#For a particular word at max three tries have to be travelled:
+#1. trie corresponding to similar words of same length which is a result of replacement of a single character
+#2. trie corresponding to words which can be obtained by deleting one character from given word
+#3. trie corresponding to words which can be obtained by inserting one character in geven word
+
 class TrieMap:
 	def _init_(self,sizeVsWordsMap,minlen,maxlen):
 		trieMap = {}
@@ -63,7 +80,14 @@ class TrieMap:
 		self.minlen = minlen
 		self.maxlen = maxlen
 
-
+	#method to travel the trie of words of same length and return a list of smilar words
+	# word		-> input word
+	# level		-> index in word
+	# flag		-> to flag the replacement of char
+	# tempNode	-> trieNode
+	# sameLength	-> list to store similar words, result of this method
+	# similarWord	-> characters are appended in this to create the word
+	# @returnType	-> list of similar words of same length
 	def findSameLength(self,word,level,flag,tempNode,sameLength,similarWord):
 		if not tempNode.branches:
 			if similarWord not in sameLength:
@@ -83,6 +107,14 @@ class TrieMap:
 					sameLength = self.findSameLength(word,level+1,flag,tempNode.branches[key],sameLength,similarWord+word[level])
 		return sameLength
 
+	# method to travel the trie of words of length one more than input and return a list of smilar words
+	# word		-> input word
+	# level		-> index in word
+	# flag		-> to flag the insertion of char
+	# tempNode	-> trieNode
+	# longer	-> list to store similar words, result of this method
+	# similarWord	-> characters are appended in this to create the word
+	# @returnType	-> list of similar words of one greater length
 	def findLonger(self,word,level,flag,tempNode,longer,similarWord):
 		if not tempNode.branches:
 			if similarWord not in longer:
@@ -106,6 +138,14 @@ class TrieMap:
 					longer = self.findLonger(word,level+1,flag,tempNode.branches[key],longer,similarWord+word[level])
 		return longer
 	
+	# method to travel the trie of words of one smaller length and return a list of smilar words
+	# word		-> input word
+	# level		-> index in word
+	# flag		-> to flag the deletion of char
+	# tempNode	-> trieNode
+	# smaller	-> list to store similar words, result of this method
+	# similarWord	-> characters are appended in this to create the word
+	# @returnType	-> list of similar words of one smaller length
 	def findSmaller(self,word,level,flag,tempNode,smaller,similarWord):
 		if not tempNode.branches:
 			if similarWord not in smaller:
@@ -125,7 +165,8 @@ class TrieMap:
 					smaller = self.findSmaller(word,level+1,flag,tempNode.branches[key],smaller,similarWord+word[level])
 		return smaller
 		
-
+	#method exposed to find all words similar to a given word
+	#@returnType -> list of all similar words
 	def findSimilar(self,word):
 		sameLength = []
 		longer = []
